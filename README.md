@@ -1,4 +1,46 @@
-# Welcome to your Lovable project
+# Stellar Payment dApp
+
+A modern, user-friendly decentralized application for sending XLM payments on the Stellar Testnet using Freighter wallet.
+
+## Features
+
+✨ **Enhanced Freighter Wallet Integration**
+- Seamless wallet connection with auto-detection
+- Beautiful connection status indicators
+- Network verification (Testnet)
+- One-click address copying
+- Direct link to Stellar Explorer
+
+💰 **Smart Balance Display**
+- Real-time XLM balance updates
+- Elegant loading states
+- Low balance warnings
+- Quick access to Friendbot for test XLM
+
+🚀 **Intuitive Payment Interface**
+- Clean, modern form design
+- Real-time input validation
+- Step-by-step transaction feedback
+- Success animations with transaction links
+- Comprehensive error handling
+
+🎨 **Premium UI/UX**
+- Glassmorphism design with cosmic theme
+- Smooth animations and transitions
+- Toast notifications for all actions
+- Responsive layout for all devices
+- Accessible components using shadcn/ui
+
+## Technologies
+
+- **Stellar SDK** - Blockchain interactions
+- **Freighter API** - Wallet integration
+- **React** - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool
+- **shadcn/ui** - Component library
+- **Tailwind CSS** - Styling
+- **Sonner** - Toast notifications
 
 ## Project info
 
