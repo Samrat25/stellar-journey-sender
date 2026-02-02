@@ -216,11 +216,19 @@ interface SendPaymentProps {
 
 ## Stellar SDK Usage
 
-### Get Balance
+### Get Address
 ```javascript
-import { getBalance } from '@/stellar/stellarClient';
+import { requestAccess, getAddress } from '@stellar/freighter-api';
 
-const balance = await getBalance(publicKey);
+// Request access (prompts user if not already allowed)
+const accessObj = await requestAccess();
+if (!accessObj.error) {
+  const publicKey = accessObj.address;
+}
+
+// Get address (returns address if already allowed, empty string otherwise)
+const addressObj = await getAddress();
+const publicKey = addressObj.address;
 ```
 
 ### Build Transaction

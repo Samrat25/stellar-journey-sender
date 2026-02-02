@@ -13,7 +13,8 @@ import {
   isConnected,
   isAllowed,
   setAllowed,
-  getPublicKey,
+  requestAccess,
+  getAddress,
   getNetwork,
 } from "@stellar/freighter-api";
 import { Button } from "@/components/ui/button";
@@ -39,14 +40,47 @@ export default function WalletConnect({ onConnect, onDisconnect, publicKey }) {
    */
   const checkFreighterStatus = async () => {
     try {
-      const connected = await isConnected();
+      console.log("Checking Freighter status..."); // Debug
+      const connectedResult = await isConnected();
+      console.log("isConnected result:", connectedResult); // Debug
+      
+      const connected = connectedResult.isConnected || connectedResult;
       setFreighterInstalled(connected);
       
       if (connected) {
-        // Check if already allowed and auto-connect
-        const allowed = await isAllowed();
+        console.log("Freighter is connected, checking if allowed..."); // Debug
+        // Check if already allowed and try to get address
+        const allowedResult = await isAllowed();
+        console.log("isAllowed result:", allowedResult); // Debug
+        
+        const allowed = allowedResult.isAllowed || allowedResult;
+        
         if (allowed) {
-          await connectWallet(true);
+          console.log("App is allowed, getting address..."); // Debug
+          // Try to get address without prompting
+          const addressObj = await getAddress();
+          console.log("getAddress result:", addressObj); // Debug
+          
+          if (addressObj.address) {
+            console.log("Got address, checking network..."); // Debug
+            // Auto-connect silently
+            const networkResult = await getNetwork();
+            console.log("Network check result:", networkResult); // Debug
+            
+            const networkName = networkResult.network || networkResult;
+            const isTestnet = networkName === "TESTNET";
+            
+            if (isTestnet) {
+              console.log("Network is correct, auto-connecting..."); // Debug
+              setCurrentNetwork(networkName);
+              setNetworkCorrect(true);
+              onConnect(addressObj.address);
+            } else {
+              console.warn("Wrong network:", networkName); // Debug
+              setCurrentNetwork(networkName);
+              setNetworkCorrect(false);
+            }
+          }
         }
       }
     } catch (err) {
@@ -60,11 +94,21 @@ export default function WalletConnect({ onConnect, onDisconnect, publicKey }) {
    */
   const checkNetwork = async () => {
     try {
-      const network = await getNetwork();
-      setCurrentNetwork(network);
+      const networkResult = await getNetwork();
+      console.log("Network result:", networkResult); // Debug log
+      
+      // getNetwork() returns an object like { network: "TESTNET", networkPassphrase: "..." }
+      const networkName = networkResult.network || networkResult;
+      setCurrentNetwork(networkName);
+      
       // Freighter returns "TESTNET" for testnet
-      const isTestnet = network === "TESTNET";
+      const isTestnet = networkName === "TESTNET";
       setNetworkCorrect(isTestnet);
+      
+      if (!isTestnet) {
+        console.warn("Wrong network detected:", networkName);
+      }
+      
       return isTestnet;
     } catch (err) {
       console.error("Error checking network:", err);
@@ -78,27 +122,41 @@ export default function WalletConnect({ onConnect, onDisconnect, publicKey }) {
    * @param {boolean} silent - If true, don't show errors (for auto-connect)
    */
   const connectWallet = useCallback(async (silent = false) => {
+    console.log("connectWallet called, silent:", silent); // Debug
     setIsLoading(true);
     setError(null);
 
     try {
-      // First, request permission from user if not already allowed
-      const allowed = await isAllowed();
-      if (!allowed) {
-        await setAllowed();
+      console.log("Requesting access from Freighter..."); // Debug
+      // Request access from user (this will prompt if not already allowed)
+      const accessObj = await requestAccess();
+      console.log("requestAccess result:", accessObj); // Debug
+      
+      if (accessObj.error) {
+        throw new Error(accessObj.error);
       }
-
-      // Get the user's public key
-      const pubKey = await getPublicKey();
+      
+      const pubKey = accessObj.address;
+      console.log("Got public key:", pubKey); // Debug
       
       if (!pubKey) {
         throw new Error("Could not retrieve public key from Freighter");
       }
 
       // Verify we're on testnet
-      const isTestnet = await checkNetwork();
+      console.log("Checking network..."); // Debug
+      const networkResult = await getNetwork();
+      console.log("Network result:", networkResult); // Debug
+      
+      const networkName = networkResult.network || networkResult;
+      setCurrentNetwork(networkName);
+      
+      const isTestnet = networkName === "TESTNET";
+      setNetworkCorrect(isTestnet);
+      
       if (!isTestnet) {
-        const errorMsg = "Please switch to Stellar Testnet in Freighter settings";
+        const errorMsg = `Please switch to Stellar Testnet in Freighter settings (currently on ${networkName})`;
+        console.warn(errorMsg); // Debug
         setError(errorMsg);
         if (!silent) {
           toast.error(errorMsg);
@@ -108,8 +166,11 @@ export default function WalletConnect({ onConnect, onDisconnect, publicKey }) {
       }
 
       // Notify parent component of successful connection
+      console.log("Connection successful, notifying parent..."); // Debug
       onConnect(pubKey);
-      toast.success("Wallet connected successfully!");
+      if (!silent) {
+        toast.success("Wallet connected successfully!");
+      }
     } catch (err) {
       console.error("Wallet connection error:", err);
       const errorMsg = err.message || "Failed to connect wallet";

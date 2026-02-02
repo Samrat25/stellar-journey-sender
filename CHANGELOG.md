@@ -2,6 +2,14 @@
 
 ## [Enhanced] - 2026-02-02
 
+### 🐛 Critical Fix
+
+#### Freighter API Integration
+- **Fixed** incorrect usage of `getPublicKey()` (doesn't exist in Freighter API)
+- **Updated** to use `requestAccess()` for wallet connection
+- **Updated** to use `getAddress()` for auto-connect functionality
+- **Improved** error handling for Freighter API responses
+
 ### 🎨 UI/UX Improvements
 
 #### WalletConnect Component

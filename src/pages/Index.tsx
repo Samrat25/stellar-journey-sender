@@ -15,6 +15,7 @@ import WalletConnect from "@/components/WalletConnect";
 import Balance from "@/components/Balance";
 import SendPayment from "@/components/SendPayment";
 import TransactionHistory from "@/components/TransactionHistory";
+import FreighterDebug from "@/components/FreighterDebug";
 import { Sparkles, Github, BookOpen } from "lucide-react";
 
 const Index = () => {
@@ -114,6 +115,11 @@ const Index = () => {
             Connect your Freighter wallet to send XLM on the Stellar Testnet. 
             Click any address in your history to auto-fill the recipient.
           </p>
+        </div>
+
+        {/* Debug Panel - Remove this after fixing the issue */}
+        <div className="max-w-5xl mx-auto mb-6">
+          <FreighterDebug />
         </div>
 
         {/* Cards grid */}
