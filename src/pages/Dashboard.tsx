@@ -8,7 +8,6 @@ import { useState, useCallback, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Balance from "@/components/Balance";
 import SendPayment from "@/components/SendPayment";
-import FreighterHelp from "@/components/FreighterHelp";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -194,35 +193,27 @@ const Dashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="max-w-4xl mx-auto mt-8 space-y-6">
-          {/* Help Card */}
-          <div className="animate-in fade-in slide-in-from-bottom duration-700 delay-300">
-            <FreighterHelp />
-          </div>
-
-          {/* Quick Actions Card */}
-          <div className="animate-in fade-in slide-in-from-bottom duration-700 delay-200">
-            <div className="glass-card p-6">
-              <h3 className="font-semibold text-foreground mb-4">Quick Actions</h3>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <Button
-                  variant="outline"
-                  onClick={() => navigate("/history")}
-                  className="gap-2 justify-start"
-                >
-                  <History className="h-4 w-4" />
-                  View Transaction History
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  onClick={() => window.open(`https://stellar.expert/explorer/testnet/account/${publicKey}`, "_blank")}
-                  className="gap-2 justify-start"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  View on Explorer
-                </Button>
-              </div>
+        <div className="max-w-4xl mx-auto mt-8 animate-in fade-in slide-in-from-bottom duration-700 delay-200">
+          <div className="glass-card p-6">
+            <h3 className="font-semibold text-foreground mb-4">Quick Actions</h3>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Button
+                variant="outline"
+                onClick={() => navigate("/history")}
+                className="gap-2 justify-start"
+              >
+                <History className="h-4 w-4" />
+                View Transaction History
+              </Button>
+              
+              <Button
+                variant="outline"
+                onClick={() => window.open(`https://stellar.expert/explorer/testnet/account/${publicKey}`, "_blank")}
+                className="gap-2 justify-start"
+              >
+                <Sparkles className="h-4 w-4" />
+                View on Explorer
+              </Button>
             </div>
           </div>
         </div>
