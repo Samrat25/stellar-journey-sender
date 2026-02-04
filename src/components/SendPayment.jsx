@@ -11,6 +11,7 @@
 
 import { useState, useEffect } from "react";
 import { signTransaction } from "@stellar/freighter-api";
+import { isAllowed, requestAccess } from "@stellar/freighter-api";
 import {
   buildPaymentTransaction,
   submitTransaction,
@@ -98,6 +99,20 @@ export default function SendPayment({ publicKey, onTransactionComplete, prefille
       setIsLoading(true);
       setStep("signing");
 
+      // Step 1.5: Ensure Freighter is still connected
+      // This is important because Freighter might have disconnected
+      const allowedResult = await isAllowed();
+      const allowed = allowedResult.isAllowed || allowedResult;
+      
+      if (!allowed) {
+        // Request access again
+        toast.info("Requesting wallet permission...");
+        const accessResult = await requestAccess();
+        if (accessResult.error) {
+          throw new Error("Wallet permission denied. Please connect your wallet.");
+        }
+      }
+
       // Step 2: Build the transaction
       const transactionXDR = await buildPaymentTransaction(
         publicKey,
@@ -107,11 +122,18 @@ export default function SendPayment({ publicKey, onTransactionComplete, prefille
 
       // Step 3: Sign with Freighter
       // This will open a popup in the Freighter extension
-      const signedXDR = await signTransaction(transactionXDR, {
+      toast.info("Please approve the transaction in Freighter");
+      
+      const signResult = await signTransaction(transactionXDR, {
         network: "TESTNET",
         networkPassphrase: NETWORK_PASSPHRASE,
         accountToSign: publicKey,
       });
+
+      console.log("Sign result:", signResult); // Debug log
+
+      // Freighter returns an object with signedTxXdr property
+      const signedXDR = signResult.signedTxXdr || signResult;
 
       // Check if user cancelled the signature
       if (!signedXDR) {
@@ -142,7 +164,17 @@ export default function SendPayment({ publicKey, onTransactionComplete, prefille
       }
     } catch (err) {
       console.error("Payment error:", err);
-      const errorMsg = err.message || "Transaction failed. Please try again.";
+      let errorMsg = err.message || "Transaction failed. Please try again.";
+      
+      // Handle specific Freighter errors
+      if (err.message && err.message.includes("User declined")) {
+        errorMsg = "Transaction was rejected in Freighter wallet";
+      } else if (err.message && err.message.includes("not connected")) {
+        errorMsg = "Wallet not connected. Please reconnect your wallet and try again.";
+      } else if (err.message && err.message.includes("permission")) {
+        errorMsg = "Wallet permission denied. Please allow access in Freighter settings.";
+      }
+      
       setError(errorMsg);
       toast.error("Transaction failed", {
         description: errorMsg,

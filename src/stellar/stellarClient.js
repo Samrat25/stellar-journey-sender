@@ -141,23 +141,25 @@ export async function buildPaymentTransaction(sourcePublicKey, destinationPublic
  */
 export async function submitTransaction(signedXDR) {
   try {
-    // Reconstruct the transaction from the signed XDR
-    const transaction = StellarSdk.TransactionBuilder.fromXDR(
-      signedXDR,
-      NETWORK_PASSPHRASE
+    console.log("Submitting transaction, XDR:", signedXDR.substring(0, 50) + "..."); // Debug
+    
+    // Submit the signed XDR directly to Horizon
+    // Horizon's submitTransaction can accept XDR string directly
+    const result = await server.submitTransaction(
+      StellarSdk.TransactionBuilder.fromXDR(signedXDR, NETWORK_PASSPHRASE)
     );
     
-    // Submit to the Stellar network via Horizon
-    const result = await server.submitTransaction(transaction);
-    
+    console.log("Transaction submitted successfully:", result.hash); // Debug
     return result;
   } catch (error) {
+    console.error("Submit transaction error:", error);
+    
     // Parse Stellar-specific errors for better user feedback
     if (error.response && error.response.data && error.response.data.extras) {
       const extras = error.response.data.extras;
       const resultCodes = extras.result_codes;
       
-      if (resultCodes.operations) {
+      if (resultCodes && resultCodes.operations) {
         const opError = resultCodes.operations[0];
         switch (opError) {
           case "op_underfunded":
@@ -170,7 +172,12 @@ export async function submitTransaction(signedXDR) {
             throw new Error(`Transaction failed: ${opError}`);
         }
       }
+      
+      if (resultCodes && resultCodes.transaction) {
+        throw new Error(`Transaction failed: ${resultCodes.transaction}`);
+      }
     }
+    
     throw error;
   }
 }
