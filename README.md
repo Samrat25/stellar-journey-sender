@@ -29,8 +29,8 @@ A modern, user-friendly decentralized application for sending XLM payments on th
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repo-url>
-   cd stellarpay-dapp
+   git clone https://github.com/Samrat25/stellar-journey-frontend-challenge.git
+   cd stellar-journey-frontend-challenge
    ```
 
 2. **Install dependencies**
@@ -45,7 +45,7 @@ A modern, user-friendly decentralized application for sending XLM payments on th
 
 4. **Open your browser**
    ```
-   Navigate to http://localhost:5173
+   Navigate to http://localhost:8080
    ```
 
 ### Building for Production
@@ -89,7 +89,7 @@ The built files will be in the `dist/` directory.
 ### Wallet Connected State
 *Freighter wallet successfully connected with address displayed*
 
-![Wallet Connected](./screenshots/Balancecheck.png)
+![Wallet Connected](./screenshots/walletconnect.png)
 
 ### Balance Displayed
 *Real-time XLM balance with refresh functionality*
